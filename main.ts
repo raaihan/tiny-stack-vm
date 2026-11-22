@@ -1,6 +1,11 @@
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-// Tiny stack VM for make.fun's ISA. One run answers a whole set of programs.
+// Tiny stack VM for make.fun's stack ISA: 32-bit wrapping ints, a 256-value stack,
+// a 64-deep call stack, 256 words of memory, input and output, and ten traps.
+// Traps (exit codes): 2 stack underflow, 3 stack overflow, 4 divide by zero,
+// 5 unknown opcode, 6 bad memory address, 7 call overflow, 8 return underflow,
+// 9 bad pc / truncated immediate, 10 step limit (1,000,000), 11 output full (65,536).
+// One run answers a whole set of programs.
 const I = process.env.MAKEFUN_INPUT_DIR ?? '/input';
 const O = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 // opcode -> [immediate bytes, pops, pushes]
@@ -85,6 +90,8 @@ function run(p: Uint8Array, inp: Uint8Array): { o: Uint8Array; c: number } {
   }
 }
 
+// Driver: each instance dir holds program.bin + input.bin; its answers go to
+// stdout.bin (the bytes written) and exit.txt (the exit code, decimal + newline).
 for (const id of readdirSync(I).sort()) {
   const r = run(new Uint8Array(readFileSync(join(I, id, 'program.bin'))), new Uint8Array(readFileSync(join(I, id, 'input.bin'))));
   mkdirSync(join(O, id), { recursive: true });
