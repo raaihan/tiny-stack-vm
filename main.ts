@@ -1,3 +1,8 @@
+// tiny-stack-vm: a tiny stack virtual machine for make.fun's stack ISA.
+// Values are 32-bit wrapping ints; data stack 256, call stack 64, memory 256
+// words. Ten traps (exit codes 2-11), step limit 1e6, output limit 65536.
+// Driver: reads /input/<id>/program.bin + input.bin, writes
+// /output/<id>/stdout.bin + exit.txt for i001..i040.
 const fs=require('node:fs');
 function run(P,I){
  const M=new Int32Array(256),S=[],C=[];
